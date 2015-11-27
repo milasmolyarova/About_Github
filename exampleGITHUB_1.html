@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ExampleGITHUB</title>
+    <style>
+    body {
+        width: 100%;
+        padding-top: 50px;
+        margin: 0;
+        background-color: #EDE7F6;
+        text-align: center;
+    }
+    ul {
+        list-style: none;
+    }
+    li,
+    .head {
+        font: 12px Arial;
+        color: #6a1b9a;
+    }
+    #list1 {
+        float: left;
+        width: 200px;
+    }
+    #list2 {
+        margin-left: 250px;
+    }
+    input,
+    button {
+        border: none;
+        outline: none;
+        padding: 5px;
+    }
+    button {
+        background-color: #9575CD;
+        color: #fff;
+        margin-left: 10px;
+    }
+</style>        
+</head>
+<body>
+    <div id="tdlApp">
+        <input id="myUser" type="text" name="user" placeholder="user">
+        <button id="button">Add</button>
+        <div class="tdlDiv">
+            <ul id="list">
+                
+            </ul>
+        </div>
+    </div>
+<script src="jquery-2.1.4.min.js"></script>
+<script>
+    
+    var tdList = $('#list');
+    var tdMask = 'tdl_';
+    function createCORSRequest (method, url) {
+        
+        var xhr = new XMLHttpRequest();
+        if ("withCredentials" in xhr) {
+            // XHR for Chrome/Firefox/Opera/Safari.
+            xhr.open(method, url, true);
+        }
+        else if (typeof XDomainRequest != "undefined") {
+            // XDomainRequest for IE.
+            xhr = new XDomainRequest();
+            xhr.open(method, url);
+        }
+        else {
+            // CORS not supported.
+            xhr = null;
+        }
+        return xhr;
+    };
+
+    function makeCORSRequest (argument) {
+        var user = document.getElementById("myUser").value;
+        var url = 'https://api.github.com/users/' + user;
+        var xhr = createCORSRequest ('GET', url);
+        if (!xhr) {
+            alert('CORS not supported');
+            return;
+        }
+        
+    // Response handlers.
+        xhr.onload = function () {
+            alert("Response: " + xhr.responseText);
+            var userInfo = JSON.parse(xhr.responseText);
+            var dat = userInfo;
+            document.getElementById('list').insertAdjacentHTML ("afterBegin", "<div class='body'><div class='head'>"+dat.login+"</div><div class='content'><ul><li><img src='"+dat.avatar_url+"' alt=''></li><li>UserID: <span>"+dat.id+"</span></li><li>AccType:<span>"+dat.type+"</span></li></ul></div></div>");
+        }
+        xhr.onerror = function () {
+            alert("Oops!");
+        }
+        xhr.send();
+        
+        if(user.length > 0) {
+        var nId = 0;
+        
+        tdList.children().each(function(index, el){
+            var jelId = $(el).attr('data-itemid').slice(4);
+            if (jelId > nId)
+                nId = jelId;
+        })
+        nId++;
+        
+        localStorage.setItem(tdMask+nId, user);
+        $('<li></li>').addClass('tdItem')
+            .attr('data-itemid', tdMask + nId);
+        }
+    };
+document.getElementById("button").onclick = function() {
+    makeCORSRequest();   
+}; 
+
+    function showUsers(){
+    var lsLen = localStorage.length;
+    if(lsLen > 0){
+        for(var i = 0; i < lsLen; i++){
+            var key = localStorage.key(i);
+            if(key.indexOf(tdMask) == 0){
+                $('<li></li>').addClass('tdItem')
+                    .attr('data-itemid', key)
+                    .text(localStorage.getItem(key))
+                    .appendTo(list);
+            }
+        }
+    }
+    
+};
+    showUsers();
+
+</script>    
+</body>
+</html>
